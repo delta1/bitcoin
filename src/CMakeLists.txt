@@ -38,6 +38,7 @@ if(NOT BUILD_TESTS)
 endif()
 set(SECP256K1_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 include(GetTargetInterface)
+add_subdirectory(simplicity)
 # -fsanitize and related flags apply to both C++ and C,
 # so we can pass them down to libsecp256k1 as CFLAGS and LDFLAGS.
 get_target_interface(SECP256K1_APPEND_CFLAGS "" sanitize_interface COMPILE_OPTIONS)
@@ -127,6 +128,7 @@ target_link_libraries(bitcoin_consensus
     core_interface
     bitcoin_crypto
     secp256k1
+    BitcoinSimplicity
 )
 add_dependencies(bitcoin_consensus generate_binana_info)
 
