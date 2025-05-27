@@ -101,6 +101,7 @@ target_link_libraries(bitcoinkernel
     core_interface
     kernel_warn_interface
     secp256k1_objs
+    BitcoinSimplicity
     $<$<PLATFORM_ID:Windows>:bcrypt>
     $<TARGET_NAME_IF_EXISTS:USDT::headers>
     Boost::headers
