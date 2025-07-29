@@ -59,7 +59,7 @@ def fill_mempool(test_framework, node, *, tx_sync_fun=None):
     txouts = gen_return_txouts()
     relayfee = node.getnetworkinfo()['relayfee']
 
-    assert_equal(relayfee, Decimal('0.00001000'))
+    assert_equal(relayfee, Decimal('0.00000100'))
 
     tx_batch_size = 1
     num_of_batches = 75
@@ -96,7 +96,7 @@ def fill_mempool(test_framework, node, *, tx_sync_fun=None):
     for fee in batch_fees[:-3]:
         send_batch(fee)
     tx_sync_fun() if tx_sync_fun else test_framework.sync_mempools()  # sync before any eviction
-    assert_equal(node.getmempoolinfo()["mempoolminfee"], Decimal("0.00001000"))
+    assert_equal(node.getmempoolinfo()["mempoolminfee"], Decimal("0.00000100"))
     for fee in batch_fees[-3:]:
         send_batch(fee)
     tx_sync_fun() if tx_sync_fun else test_framework.sync_mempools()  # sync after all evictions
@@ -108,8 +108,8 @@ def fill_mempool(test_framework, node, *, tx_sync_fun=None):
     assert tx_to_be_evicted_id not in node.getrawmempool()
 
     test_framework.log.debug("Check that mempoolminfee is larger than minrelaytxfee")
-    assert_equal(node.getmempoolinfo()['minrelaytxfee'], Decimal('0.00001000'))
-    assert_greater_than(node.getmempoolinfo()['mempoolminfee'], Decimal('0.00001000'))
+    assert_equal(node.getmempoolinfo()['minrelaytxfee'], Decimal('0.00000100'))
+    assert_greater_than(node.getmempoolinfo()['mempoolminfee'], Decimal('0.00000100'))
 
 def tx_in_orphanage(node, tx: CTransaction) -> bool:
     """Returns true if the transaction is in the orphanage."""

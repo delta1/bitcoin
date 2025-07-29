@@ -590,7 +590,13 @@ void TestChain100Setup::MockMempoolMinFee(const CFeeRate& target_feerate)
     LockPoints lp;
     // The new mempool min feerate is equal to the removed package's feerate + incremental feerate.
     const auto tx_fee = target_feerate.GetFee(GetVirtualTransactionSize(*tx)) -
-        m_node.mempool->m_opts.incremental_relay_feerate.GetFee(GetVirtualTransactionSize(*tx));
+        (10*m_node.mempool->m_opts.incremental_relay_feerate).GetFee(GetVirtualTransactionSize(*tx));
+    const auto temp = target_feerate.GetFee(GetVirtualTransactionSize(*tx)) -
+        CFeeRate(1000).GetFee(GetVirtualTransactionSize(*tx));
+    std::cout << "vsize: " << GetVirtualTransactionSize(*tx) << std::endl;
+    std::cout << "inc fee: " << m_node.mempool->m_opts.incremental_relay_feerate.GetFee(GetVirtualTransactionSize(*tx)) << std::endl;
+    std::cout << "tx_fee: " << tx_fee << std::endl;
+    std::cout << "temp: " << temp << std::endl;
     {
         auto changeset = m_node.mempool->GetChangeSet();
         changeset->StageAddition(tx, /*fee=*/tx_fee,
@@ -599,6 +605,8 @@ void TestChain100Setup::MockMempoolMinFee(const CFeeRate& target_feerate)
         changeset->Apply();
     }
     m_node.mempool->TrimToSize(0);
+    std::cout << "getminfee: " << m_node.mempool->GetMinFee().ToString() << std::endl;
+    std::cout << "target_feerate: " << target_feerate.ToString() << std::endl;
     assert(m_node.mempool->GetMinFee() == target_feerate);
 }
 /**
