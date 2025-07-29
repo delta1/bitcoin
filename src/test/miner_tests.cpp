@@ -245,7 +245,7 @@ void MinerTestingSetup::TestPackageSelection(const CScript& scriptPubKey, const 
     BOOST_REQUIRE(block_template);
     block = block_template->getBlock();
     BOOST_REQUIRE_EQUAL(block.vtx.size(), 9U);
-    BOOST_CHECK(block.vtx[8]->GetHash() == hashLowFeeTx2);
+    BOOST_CHECK(block.vtx[6]->GetHash() == hashLowFeeTx2);
 }
 
 void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst, int baseheight)
