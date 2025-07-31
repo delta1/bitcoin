@@ -49,8 +49,8 @@ from test_framework.wallet import (
     MiniWalletMode,
 )
 
-# 1sat/vB feerate denominated in BTC/KvB
-FEERATE_1SAT_VB = Decimal("0.00001000")
+# 0.1sat/vB feerate denominated in BTC/KvB
+FEERATE_MIN = Decimal("0.00000100")
 # Number of seconds to wait to ensure no getdata is received
 GETDATA_WAIT = 60
 
@@ -79,13 +79,13 @@ class PackageRelayTest(BitcoinTestFramework):
         ]]
 
     def create_tx_below_mempoolminfee(self, wallet):
-        """Create a 1-input 1sat/vB transaction using a confirmed UTXO. Decrement and use
+        """Create a 1-input 0.1sat/vB transaction using a confirmed UTXO. Decrement and use
         self.sequence so that subsequent calls to this function result in unique transactions."""
 
         self.sequence -= 1
-        assert_greater_than(self.nodes[0].getmempoolinfo()["mempoolminfee"], FEERATE_1SAT_VB)
+        assert_greater_than(self.nodes[0].getmempoolinfo()["mempoolminfee"], FEERATE_MIN)
 
-        return wallet.create_self_transfer(fee_rate=FEERATE_1SAT_VB, sequence=self.sequence, confirmed_only=True)
+        return wallet.create_self_transfer(fee_rate=FEERATE_MIN, sequence=self.sequence, confirmed_only=True)
 
     @cleanup
     def test_basic_child_then_parent(self):
@@ -93,7 +93,7 @@ class PackageRelayTest(BitcoinTestFramework):
         self.log.info("Check that opportunistic 1p1c logic works when child is received before parent")
 
         low_fee_parent = self.create_tx_below_mempoolminfee(self.wallet)
-        high_fee_child = self.wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=20*FEERATE_1SAT_VB)
+        high_fee_child = self.wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=20*FEERATE_MIN)
 
         peer_sender = node.add_p2p_connection(P2PInterface())
 
@@ -121,7 +121,7 @@ class PackageRelayTest(BitcoinTestFramework):
     def test_basic_parent_then_child(self, wallet):
         node = self.nodes[0]
         low_fee_parent = self.create_tx_below_mempoolminfee(wallet)
-        high_fee_child = wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=20*FEERATE_1SAT_VB)
+        high_fee_child = wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=20*FEERATE_MIN)
 
         peer_sender = node.add_outbound_p2p_connection(P2PInterface(), p2p_idx=1, connection_type="outbound-full-relay")
         peer_ignored = node.add_outbound_p2p_connection(P2PInterface(), p2p_idx=2, connection_type="outbound-full-relay")
@@ -163,7 +163,7 @@ class PackageRelayTest(BitcoinTestFramework):
         # This feerate is above mempoolminfee, but not enough to also bump the low feerate parent.
         feerate_just_above = node.getmempoolinfo()["mempoolminfee"]
         med_fee_child = wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=feerate_just_above)
-        high_fee_child = wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=999*FEERATE_1SAT_VB)
+        high_fee_child = wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=999*FEERATE_MIN)
 
         peer_sender = node.add_outbound_p2p_connection(P2PInterface(), p2p_idx=1, connection_type="outbound-full-relay")
         peer_ignored = node.add_outbound_p2p_connection(P2PInterface(), p2p_idx=2, connection_type="outbound-full-relay")
@@ -274,7 +274,7 @@ class PackageRelayTest(BitcoinTestFramework):
         self.log.info("Check opportunistic 1p1c logic with consensus-invalid parent causes disconnect of the correct peer")
         node = self.nodes[0]
         low_fee_parent = self.create_tx_below_mempoolminfee(self.wallet)
-        high_fee_child = self.wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=999*FEERATE_1SAT_VB)
+        high_fee_child = self.wallet.create_self_transfer(utxo_to_spend=low_fee_parent["new_utxo"], fee_rate=999*FEERATE_MIN)
 
         # Create invalid version of parent with a bad signature.
         tx_parent_bad_wit = tx_from_hex(low_fee_parent["hex"])
@@ -359,7 +359,7 @@ class PackageRelayTest(BitcoinTestFramework):
         # This parent needs CPFP
         parent_low = self.create_tx_below_mempoolminfee(self.wallet)
         # This parent does not need CPFP and can be submitted alone ahead of time
-        parent_high = self.wallet.create_self_transfer(fee_rate=FEERATE_1SAT_VB*10, confirmed_only=True)
+        parent_high = self.wallet.create_self_transfer(fee_rate=FEERATE_MIN*10, confirmed_only=True)
         child = self.wallet.create_self_transfer_multi(
             utxos_to_spend=[parent_high["new_utxo"], parent_low["new_utxo"]],
             fee_per_output=999*parent_low["tx"].get_vsize(),
@@ -439,7 +439,7 @@ class PackageRelayTest(BitcoinTestFramework):
         low_fee_parent = self.create_tx_below_mempoolminfee(self.wallet)
         high_fee_child = self.wallet.create_self_transfer(
             utxo_to_spend=low_fee_parent["new_utxo"],
-            fee_rate=200*FEERATE_1SAT_VB,
+            fee_rate=200*FEERATE_MIN,
             target_vsize=100000
         )
 
@@ -501,7 +501,7 @@ class PackageRelayTest(BitcoinTestFramework):
         low_fee_parent = self.create_tx_below_mempoolminfee(self.wallet)
         high_fee_child = self.wallet.create_self_transfer(
             utxo_to_spend=low_fee_parent["new_utxo"],
-            fee_rate=200*FEERATE_1SAT_VB,
+            fee_rate=200*FEERATE_MIN,
         )
 
         # Announce

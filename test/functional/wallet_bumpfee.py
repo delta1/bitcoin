@@ -114,7 +114,7 @@ class BumpFeeTest(BitcoinTestFramework):
         self.test_provided_change_pos(rbf_node)
         self.test_single_output()
 
-        # Context independent tests
+        # # Context independent tests
         test_feerate_checks_replaced_outputs(self, rbf_node, peer_node)
         test_bumpfee_with_feerate_ignores_walletincrementalrelayfee(self, rbf_node, peer_node)
 
@@ -535,8 +535,8 @@ def test_dust_to_fee(self, rbf_node, dest_address):
 
 def test_settxfee(self, rbf_node, dest_address):
     self.log.info('Test settxfee')
-    assert_raises_rpc_error(-8, "txfee cannot be less than min relay tx fee", rbf_node.settxfee, Decimal('0.000005'))
-    assert_raises_rpc_error(-8, "txfee cannot be less than wallet min fee", rbf_node.settxfee, Decimal('0.000015'))
+    assert_raises_rpc_error(-8, "txfee cannot be less than min relay tx fee", rbf_node.settxfee, Decimal('0.00000050'))
+    assert_raises_rpc_error(-8, "txfee cannot be less than wallet min fee", rbf_node.settxfee, Decimal('0.00001500'))
     # check that bumpfee reacts correctly to the use of settxfee (paytxfee)
     rbfid = spend_one_input(rbf_node, dest_address)
     requested_feerate = Decimal("0.00025000")
@@ -850,10 +850,10 @@ def test_bumpfee_with_feerate_ignores_walletincrementalrelayfee(self, rbf_node, 
 
     # Ensure you can not fee bump if the fee_rate is more than original fee_rate but the total fee from new fee_rate is
     # less than (original fee + incrementalrelayfee)
-    assert_raises_rpc_error(-8, "Insufficient total fee", rbf_node.bumpfee, tx["txid"], {"fee_rate": 2.8})
+    assert_raises_rpc_error(-8, "Insufficient total fee", rbf_node.bumpfee, tx["txid"], {"fee_rate": 2.09})
 
     # You can fee bump as long as the new fee set from fee_rate is at least (original fee + incrementalrelayfee)
-    rbf_node.bumpfee(tx["txid"], {"fee_rate": 3})
+    rbf_node.bumpfee(tx["txid"], {"fee_rate": 2.1})
     self.clear_mempool()
 
 

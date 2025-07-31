@@ -5,7 +5,7 @@
 """Test the fundrawtransaction RPC."""
 
 
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from itertools import product
 from math import ceil
 from test_framework.address import address_to_scriptpubkey
@@ -254,6 +254,7 @@ class RawTransactionsTest(BitcoinTestFramework):
 
         rawtxfund = self.nodes[2].fundrawtransaction(rawtx)
         fee = rawtxfund['fee']
+        print(fee)
         self.test_no_change_fee = fee  # Use the same fee for the next tx
         dec_tx  = self.nodes[2].decoderawtransaction(rawtxfund['hex'])
         totalOut = 0
@@ -267,6 +268,12 @@ class RawTransactionsTest(BitcoinTestFramework):
         utx = get_unspent(self.nodes[2].listunspent(), 5)
 
         inputs  = [ {'txid' : utx['txid'], 'vout' : utx['vout']}]
+        print(self.test_no_change_fee)
+        print(self.fee_tolerance)
+        print(Decimal(5.0) - self.test_no_change_fee - self.fee_tolerance)
+        print(getcontext().prec)
+        getcontext().prec = 8
+        print(getcontext().prec)
         outputs = {self.nodes[0].getnewaddress(): Decimal(5.0) - self.test_no_change_fee - self.fee_tolerance}
         rawtx   = self.nodes[2].createrawtransaction(inputs, outputs)
         dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
@@ -633,7 +640,7 @@ class RawTransactionsTest(BitcoinTestFramework):
 
         # Deduce exact fee to produce a changeless transaction
         tx_size = 110  # Total tx size: 110 vbytes, p2wpkh -> p2wpkh. Input 68 vbytes + rest of tx is 42 vbytes.
-        value = inputs[0]["amount"] - get_fee(tx_size, self.min_relay_tx_fee)
+        value = inputs[0]["amount"] - get_fee(tx_size, 10 * self.min_relay_tx_fee)
 
         outputs = {self.nodes[0].getnewaddress():value}
         rawtx = wallet.createrawtransaction(inputs, outputs)
@@ -668,7 +675,7 @@ class RawTransactionsTest(BitcoinTestFramework):
             self.generate(self.nodes[1], 1)
 
             # Make sure funds are received at node1.
-            assert_equal(oldBalance+Decimal('51.10000000'), self.nodes[0].getbalance())
+            assert_equal(oldBalance + Decimal('51.10000000'), self.nodes[0].getbalance())
 
             # Restore pre-test wallet state
             wallet.sendall(recipients=[df_wallet.getnewaddress(), df_wallet.getnewaddress(), df_wallet.getnewaddress()])
