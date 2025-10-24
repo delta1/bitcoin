@@ -1493,8 +1493,7 @@ bool EvalScript(ValtypeStack& stack, const CScript& script, unsigned int flags, 
                 {
                     if (stack.size() < 1)
                         return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
-                    stackPushCosted(altstack, std::move(stacktop(-1)), varcost);
-                    popstack(stack);
+                    altstack.push_back(stack.pop_back_valtype());
                 }
                 break;
 
@@ -1502,8 +1501,7 @@ bool EvalScript(ValtypeStack& stack, const CScript& script, unsigned int flags, 
                 {
                     if (altstack.size() < 1)
                         return set_error(serror, SCRIPT_ERR_INVALID_ALTSTACK_OPERATION);
-                    stackPushCosted(stack, std::move(altstacktop(-1)), varcost);
-                    popstack(altstack);
+                    stack.push_back(altstack.pop_back_valtype());
                 }
                 break;
 
