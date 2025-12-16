@@ -35,6 +35,7 @@ SEQUENCE_LOCKTIME_GRANULARITY = 9 # this is a bit-shift
 SEQUENCE_LOCKTIME_MASK = 0x0000ffff
 
 LEAF_VERSION_TAPSCRIPT = 0xc0
+LEAF_VERSION_TAPSIMPLICITY = 0xbe
 
 def hash160(s):
     return ripemd160(sha256(s))
