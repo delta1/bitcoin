@@ -106,6 +106,7 @@ static constexpr script_verify_flags MANDATORY_SCRIPT_VERIFY_FLAGS{SCRIPT_VERIFY
                                                              SCRIPT_VERIFY_NULLDUMMY |
                                                              SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY |
                                                              SCRIPT_VERIFY_CHECKSEQUENCEVERIFY |
+                                                             SCRIPT_VERIFY_SIMPLICITY |
                                                              SCRIPT_VERIFY_WITNESS |
                                                              SCRIPT_VERIFY_TAPROOT};
 
