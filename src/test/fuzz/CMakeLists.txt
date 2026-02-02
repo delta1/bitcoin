@@ -115,6 +115,8 @@ add_executable(fuzz
   secp256k1_ecdsa_signature_parse_der_lax.cpp
   signature_checker.cpp
   signet.cpp
+  simplicity.cpp
+  simplicity_tx.cpp
   socks5.cpp
   span.cpp
   string.cpp
@@ -147,6 +149,7 @@ target_link_libraries(fuzz
   bitcoin_cli
   bitcoin_common
   bitcoin_util
+  BitcoinSimplicity
   minisketch
   leveldb
   univalue
