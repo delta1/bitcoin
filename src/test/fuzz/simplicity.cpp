@@ -92,9 +92,12 @@ FUZZ_TARGET(simplicity, .init = initialize_simplicity)
 
     // 2. Parse the transaction (the program and witness are just raw bytes)
     CMutableTransaction mtx;
-    ParamsStream<SpanReader, TransactionSerParams> txds{SpanReader(std::span<const unsigned char>(tx_data, tx_data_len)), TX_WITH_WITNESS};
+    // make a vector of tx_data
+    std::vector<unsigned char> tx_data_vec{tx_data, tx_data + tx_data_len};
+
     try {
-        txds >> mtx;
+        DataStream txds(tx_data_vec);
+        txds >> TX_WITH_WITNESS(mtx);
         // mtx.witness.vtxinwit.resize(mtx.vin.size());
         // mtx.witness.vtxoutwit.resize(mtx.vout.size());
 

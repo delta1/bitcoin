@@ -117,7 +117,7 @@ add_executable(fuzz
   signet.cpp
   simplicity.cpp
   simplicity_compute_amr.c
-  # simplicity_tx.cpp
+  simplicity_tx.cpp
   socks5.cpp
   span.cpp
   string.cpp
