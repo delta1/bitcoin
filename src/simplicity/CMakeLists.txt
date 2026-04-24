@@ -7,6 +7,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_library(BitcoinSimplicity STATIC
   bitstream.c
+  cmr.c
   dag.c
   deserialize.c
   eval.c
@@ -17,6 +18,7 @@ add_library(BitcoinSimplicity STATIC
   sha256.c
   type.c
   typeInference.c
+  bitcoin/cmr.c
   bitcoin/env.c
   bitcoin/exec.c
   bitcoin/bitcoinJets.c

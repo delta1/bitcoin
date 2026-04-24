@@ -101,7 +101,10 @@ FUZZ_TARGET(simplicity_tx)
             const auto& control = current[top - 1];
             const auto& program = current[top - 3];
 
-            if (control.size() >= TAPROOT_CONTROL_BASE_SIZE && (control[0] & 0xfe) == 0xbe) {
+            if (control.size() >= TAPROOT_CONTROL_BASE_SIZE &&
+                control.size() <= TAPROOT_CONTROL_MAX_SIZE &&
+                (control.size() - TAPROOT_CONTROL_BASE_SIZE) % TAPROOT_CONTROL_NODE_SIZE == 0 &&
+                (control[0] & 0xfe) == 0xbe) {
                 // The fuzzer won't be able to produce a valid CMR on its own, so we compute it
                 // and jam it into the witness stack. But we do require the fuzzer give us a
                 // place to put it, so we don't have to resize the stack (and so that actual
