@@ -117,6 +117,8 @@ add_executable(fuzz
   signet.cpp
   simplicity.cpp
   simplicity_compute_amr.c
+  simplicity_deser.cpp
+  simplicity_deser_helper.c
   simplicity_jets.cpp
   simplicity_jets_helper.c
   simplicity_tx.cpp
