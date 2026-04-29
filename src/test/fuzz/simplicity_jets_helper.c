@@ -14,6 +14,7 @@
 /* Internal Simplicity headers -- not part of the public install interface. */
 #include "../../simplicity/bitcoin/txEnv.h"
 #include "../../simplicity/bitcoin/bitcoinJets.h"
+#include "../../simplicity/dag.h"     /* simplicity_computeWordCMR, bitstring */
 #include "../../simplicity/frame.h"
 #include "../../simplicity/uword.h"
 
@@ -150,7 +151,7 @@ void bitcoin_fuzz_jets(const bitcoinTransaction* tx, const bitcoinTapEnv* tap,
     JET(simplicity_bitcoin_output_script_hash,     32, 257);
     JET(simplicity_bitcoin_output_hash,            32, 257);
 
-    /* ---- tappath (src = TWO^8 = 8 bits) ----
+    /* ---- tappath (src = TWO^8 = 8 bits, input index) ----
      * pathLen=0, so any index >= 0 exercises the out-of-bounds branch.
      */
     JET(simplicity_bitcoin_tappath, 8, 257);
@@ -184,4 +185,22 @@ void bitcoin_fuzz_jets(const bitcoinTransaction* tx, const bitcoinTapEnv* tap,
     JET(simplicity_bitcoin_annex_hash,    1095, 838);
 
 #undef JET
+
+    /* ---- computeWordCMR (dag.c) + simplicity_sha256_bitstring (sha256.c) ----
+     * WORD CMR computation is triggered during DAG decoding for WORD-tagged
+     * nodes, but the fuzzer rarely produces the specific bit encoding needed.
+     * Calling it directly here with fuzz-stream data ensures the code is
+     * always exercised.
+     *
+     * n=3: scribe word of 2^3 = 8 bits  (fits in 1 byte)
+     * n=6: scribe word of 2^6 = 64 bits (exercises multi-compression path)
+     */
+    {
+        unsigned char word_bytes[8] = {0};
+        stream_read(&s, word_bytes, sizeof(word_bytes));
+        bitstring val3 = {.arr = word_bytes, .offset = 0, .len = 8};
+        simplicity_computeWordCMR(&val3, 3);
+        bitstring val6 = {.arr = word_bytes, .offset = 0, .len = 64};
+        simplicity_computeWordCMR(&val6, 6);
+    }
 }
