@@ -92,9 +92,8 @@ FUZZ_TARGET(simplicity_jets)
         return;
     }
 
-    /* All remaining fuzz bytes are consumed sequentially as src frame data
-     * inside bitcoin_fuzz_jets.  The same buffer is reused for both passes
-     * so seeds stay compact. */
+    /* All remaining fuzz bytes are consumed sequentially as src frame data.
+     * The same buffer is reused across all three passes so seeds stay compact. */
     const std::vector<uint8_t> src = fuzzed.ConsumeRemainingBytes<uint8_t>();
 
     /* Pass 1: ix=0, input 0 has no annex.
@@ -104,6 +103,11 @@ FUZZ_TARGET(simplicity_jets)
     /* Pass 2: ix=1, input 1 has an annex.
      * Exercises current_annex_hash hasAnnex=true path. */
     bitcoin_fuzz_jets(tx, tap, 1, src.data(), src.size());
+
+    /* Pass 3: env-independent core jets (jets.c + jets-secp256k1.c).
+     * These are not reachable through the bitcoin_fuzz_jets path without
+     * first clearing CMR/type-inference, so they are called directly here. */
+    simplicity_fuzz_core_jets(src.data(), src.size());
 
     simplicity_bitcoin_freeTapEnv(tap);
     simplicity_bitcoin_freeTransaction(tx);

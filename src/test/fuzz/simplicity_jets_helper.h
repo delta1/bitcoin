@@ -28,6 +28,18 @@ extern "C" {
 void bitcoin_fuzz_jets(const bitcoinTransaction* tx, const bitcoinTapEnv* tap,
                        uint_fast32_t ix, const uint8_t* src_data, size_t src_len);
 
+/* Run every env-independent jet declared in jets.h (jets.c and jets-secp256k1.c)
+ * against fuzz-controlled src frames.  This covers:
+ *   - logic, shift/rotate, and arithmetic jets
+ *   - SHA-256 primitives and CTX8 jets
+ *   - secp256k1 field, scalar, group, and signature jets
+ *   - parse_lock, parse_sequence, tapdata_init
+ *
+ * src_data / src_len are consumed sequentially across all jet calls so that a
+ * single compact corpus entry exercises the whole group.
+ */
+void simplicity_fuzz_core_jets(const uint8_t* src_data, size_t src_len);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
