@@ -188,6 +188,14 @@ FUZZ_TARGET(simplicity, .init = initialize_simplicity)
         simplicity_bitcoin_execSimplicity(&error, imr, tx, nIn, taproot, 0, budget, amr, prog_bytes.data(), prog_bytes.size(), wit_bytes.data(), wit_bytes.size());
     }
 
+    // 5b. Flip witness bits against the original program to exercise fillWitnessData
+    //     and runTCO branches that depend on witness values.
+    for (size_t j = 0; j < 8 * wit_bytes.size(); j++) {
+        if (j > 32 && j % 23 != 0) continue;
+        wit_bytes.data()[j / 8] ^= (1 << (j % 8));
+        simplicity_bitcoin_execSimplicity(&error, imr, tx, nIn, taproot, 0, budget, amr, prog_data, prog_data_len, wit_bytes.data(), wit_bytes.size());
+    }
+
     // 6. Cleanup
     free(taproot);
 }
