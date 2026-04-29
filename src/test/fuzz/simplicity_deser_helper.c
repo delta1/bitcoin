@@ -19,6 +19,8 @@
 
 #include "simplicity_deser_helper.h"
 
+#include <string.h>
+
 #include <simplicity/bitcoin/env.h>
 #include <simplicity/bitcoin/primitive.h>  /* simplicity_bitcoin_decodeJet, simplicity_bitcoin_mallocBoundVars */
 #include <simplicity/dag.h>
@@ -111,19 +113,82 @@ void simplicity_deser_run(const uint8_t* prog, size_t prog_len,
                 &ihr, dag, type_dag, (uint_fast32_t)dag_len);
         }
 
-        /* 5. Evaluate — only for Simplicity *programs* (type ONE |- ONE).
-         *    Type index 0 is always ONE in the Bitcoin application context.
-         *    Passing NULL input/output is only valid when bitSize(A) == 0.
-         *    This exercises eval.c:runTCO and frame.c:copyBits. */
-        if (IS_OK(err) &&
-            0 == dag[dag_len - 1].sourceType &&
-            0 == dag[dag_len - 1].targetType) {
-            txEnv env = simplicity_bitcoin_build_txEnv(g_deser_tx, g_deser_tap, 0);
-            static const ubounded budget = BUDGET_MAX;
-            simplicity_evalTCOExpression(
-                CHECK_ALL, NULL, NULL,
-                dag, type_dag, (size_t)dag_len,
-                0, &budget, &env);
+        /* 5. Evaluate any well-typed Simplicity expression.
+         *    Three passes target distinct uncovered paths in eval.c:
+         *
+         *    Pass A (CHECK_ALL, full budget, minCost=0):
+         *      - Allocates input/output buffers for programs of any type A |- B,
+         *        reaching the memcpy paths at eval.c:819 and eval.c:832 that were
+         *        previously unreachable (type ONE |- ONE has bitSize 0 for both).
+         *      - Seeds the input frame from witness bytes so CASE/ASSERTL/ASSERTR
+         *        branch decisions (eval.c:352) vary with fuzz data rather than
+         *        always seeing all-zero input.
+         *      - Exercises antiDos with CHECK_ALL (normal production check).
+         *
+         *    Pass B (CHECK_NONE, budget=0, minCost=0):
+         *      - budget=0 makes simplicity_analyseBounds return
+         *        SIMPLICITY_ERR_EXEC_BUDGET for any program with non-zero cost
+         *        (eval.c:742), a path the existing target never reaches.
+         *      - CHECK_NONE exercises the fast path in antiDos (eval.c:539).
+         *
+         *    Pass C (CHECK_EXEC, no budget cap, minCost=BUDGET_MAX):
+         *      - minCost=BUDGET_MAX makes simplicity_analyseBounds return
+         *        SIMPLICITY_ERR_OVERWEIGHT (eval.c:743) for almost every program
+         *        since their cost bound is well below BUDGET_MAX.
+         *      - CHECK_EXEC exercises the per-node exec-flag check in antiDos
+         *        independently of the case-branch check (eval.c:544).
+         */
+        if (IS_OK(err)) {
+            const ubounded input_bits  = type_dag[dag[dag_len - 1].sourceType].bitSize;
+            const ubounded output_bits = type_dag[dag[dag_len - 1].targetType].bitSize;
+            const size_t   input_words = ROUND_UWORD(input_bits);
+            const size_t   output_words = ROUND_UWORD(output_bits);
+
+            UWORD* input_buf  = input_words  > 0 ? simplicity_calloc(input_words,  sizeof(UWORD)) : NULL;
+            UWORD* output_buf = output_words > 0 ? simplicity_calloc(output_words, sizeof(UWORD)) : NULL;
+
+            /* Only proceed if all required allocations succeeded. */
+            if ((input_words  == 0 || input_buf)  &&
+                (output_words == 0 || output_buf)) {
+
+                /* Seed the input frame from witness bytes.  The witness bytes are
+                 * already fuzz-controlled, so reusing them here causes the bit
+                 * peeked in CASE/ASSERTL/ASSERTR to vary with the fuzzer input,
+                 * exercising both branch directions without growing the corpus. */
+                if (input_buf && wit_len > 0) {
+                    size_t copy_bytes = input_words * sizeof(UWORD);
+                    if (copy_bytes > wit_len) copy_bytes = wit_len;
+                    memcpy(input_buf, wit, copy_bytes);
+                }
+
+                txEnv env = simplicity_bitcoin_build_txEnv(g_deser_tx, g_deser_tap, 0);
+
+                /* Pass A: normal execution path. */
+                static const ubounded full_budget = BUDGET_MAX;
+                simplicity_evalTCOExpression(
+                    CHECK_ALL, output_buf, input_buf,
+                    dag, type_dag, (size_t)dag_len,
+                    0, &full_budget, &env);
+
+                /* Pass B: exercises SIMPLICITY_ERR_EXEC_BUDGET (budget=0 < any
+                 * non-zero cost) and the CHECK_NONE fast path in antiDos. */
+                static const ubounded zero_budget = 0;
+                simplicity_evalTCOExpression(
+                    CHECK_NONE, output_buf, input_buf,
+                    dag, type_dag, (size_t)dag_len,
+                    0, &zero_budget, &env);
+
+                /* Pass C: exercises SIMPLICITY_ERR_OVERWEIGHT (minCost=BUDGET_MAX
+                 * exceeds almost every program's cost bound) and the CHECK_EXEC
+                 * flag in antiDos independent of the case-branch check. */
+                simplicity_evalTCOExpression(
+                    CHECK_EXEC, output_buf, input_buf,
+                    dag, type_dag, (size_t)dag_len,
+                    BUDGET_MAX, NULL, &env);
+            }
+
+            simplicity_free(output_buf);
+            simplicity_free(input_buf);
         }
 
         simplicity_free(type_dag);
