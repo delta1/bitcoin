@@ -33,6 +33,7 @@
 #include "../../simplicity/bitcoin/txEnv.h"  /* simplicity_bitcoin_build_txEnv */
 
 static const bitcoinTransaction* g_deser_tx  = NULL;
+static const bitcoinTransaction* g_deser_tx2 = NULL; /* 2-in/2-out; input 1 has annex */
 static const bitcoinTapEnv*      g_deser_tap = NULL;
 
 void simplicity_deser_init(void)
@@ -73,6 +74,29 @@ void simplicity_deser_init(void)
 
     g_deser_tx  = simplicity_bitcoin_mallocTransaction(&raw_tx);
     g_deser_tap = simplicity_bitcoin_mallocTapEnv(&raw_tap);
+
+    /* Build a 2-in/2-out transaction.  Input 1 carries an annex (tag byte
+     * 0x50) so that current_annex_hash exercises hasAnnex=true when ix=1,
+     * and the multi-input/multi-output paths in env.c are reachable. */
+    {
+        static const unsigned char annex_tag[1] = {0x50};
+        static const rawBitcoinBuffer annex_buf2 = {.buf = annex_tag, .len = 1};
+        rawBitcoinInput inputs2[2] = {
+            { .annex = NULL,        .prevTxid = zero32,
+              .txo = {0, {NULL,0}}, .scriptSig = {NULL,0}, .prevIx = 0, .sequence = 0 },
+            { .annex = &annex_buf2, .prevTxid = zero32,
+              .txo = {0, {NULL,0}}, .scriptSig = {NULL,0}, .prevIx = 0, .sequence = 0 },
+        };
+        rawBitcoinOutput outputs2[2] = {
+            {.value = 0, .scriptPubKey = {NULL, 0}},
+            {.value = 0, .scriptPubKey = {NULL, 0}},
+        };
+        rawBitcoinTransaction raw_tx2 = {
+            .txid = zero32, .input = inputs2, .output = outputs2,
+            .numInputs = 2, .numOutputs = 2, .version = 2, .lockTime = 0,
+        };
+        g_deser_tx2 = simplicity_bitcoin_mallocTransaction(&raw_tx2);
+    }
 }
 
 void simplicity_deser_run(const uint8_t* prog, size_t prog_len,
@@ -185,6 +209,18 @@ void simplicity_deser_run(const uint8_t* prog, size_t prog_len,
                     CHECK_EXEC, output_buf, input_buf,
                     dag, type_dag, (size_t)dag_len,
                     BUDGET_MAX, NULL, &env);
+
+                /* Pass D: 2-in/2-out transaction at input index 1.
+                 * Exercises: current_index=1 (non-zero index path in env.c),
+                 * multi-input/output bounds checks, and current_annex_hash
+                 * hasAnnex=true branch (input 1 carries a 0x50 annex tag). */
+                if (g_deser_tx2) {
+                    txEnv env2 = simplicity_bitcoin_build_txEnv(g_deser_tx2, g_deser_tap, 1);
+                    simplicity_evalTCOExpression(
+                        CHECK_ALL, output_buf, input_buf,
+                        dag, type_dag, (size_t)dag_len,
+                        0, &full_budget, &env2);
+                }
             }
 
             simplicity_free(output_buf);
