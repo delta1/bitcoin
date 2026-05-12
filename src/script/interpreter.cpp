@@ -1881,14 +1881,14 @@ bool GenericTransactionSignatureChecker<T>::CheckSimplicity(const valtype& progr
     assert(txdata->m_simplicity_tx_data);
     assert(simplicityTapEnv);
     if (!simplicity_bitcoin_execSimplicity(&error, 0, txdata->m_simplicity_tx_data.get(), nIn, simplicityTapEnv, minCost, budget, 0, program.data(), program.size(), witness.data(), witness.size())) {
-        assert(!"simplicity_elements_execSimplicity internal error");
+        assert(!"simplicity_bitcoin_execSimplicity internal error");
     }
     simplicity_bitcoin_freeTapEnv(simplicityTapEnv);
     switch (error) {
     case SIMPLICITY_NO_ERROR: return set_success(serror);
     case SIMPLICITY_ERR_MALLOC:
     case SIMPLICITY_ERR_NOT_YET_IMPLEMENTED:
-        assert(!"simplicity_elements_execSimplicity internal error");
+        assert(!"simplicity_bitcoin_execSimplicity internal error");
         break;
     case SIMPLICITY_ERR_DATA_OUT_OF_RANGE: return set_error(serror, SCRIPT_ERR_SIMPLICITY_DATA_OUT_OF_RANGE);
     case SIMPLICITY_ERR_DATA_OUT_OF_ORDER: return set_error(serror, SCRIPT_ERR_SIMPLICITY_DATA_OUT_OF_ORDER);
@@ -1914,8 +1914,8 @@ bool GenericTransactionSignatureChecker<T>::CheckSimplicity(const valtype& progr
     case SIMPLICITY_ERR_HIDDEN_ROOT: return set_error(serror, SCRIPT_ERR_SIMPLICITY_HIDDEN_ROOT);
     case SIMPLICITY_ERR_AMR: return set_error(serror, SCRIPT_ERR_SIMPLICITY_AMR);
     case SIMPLICITY_ERR_OVERWEIGHT: return set_error(serror, SCRIPT_ERR_SIMPLICITY_OVERWEIGHT);
-    default: return set_error(serror, SCRIPT_ERR_UNKNOWN_ERROR);
     }
+    assert(!"simplicity_bitcoin_execSimplicity unknown error");
 }
 
 // explicit instantiation

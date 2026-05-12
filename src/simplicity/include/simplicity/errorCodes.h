@@ -105,9 +105,8 @@ static inline const char * SIMPLICITY_ERR_MSG(simplicity_err err) {
     return "Program's AMR does not match";
   case SIMPLICITY_ERR_OVERWEIGHT:
     return "Program's budget is too large";
-  default:
-    return "Unknown error code";
   }
+  return "unknown error";
 }
 
 #endif

@@ -174,6 +174,8 @@ std::string ScriptErrorString(const ScriptError serror)
             return SIMPLICITY_ERR_MSG(SIMPLICITY_ERR_AMR);
         case SCRIPT_ERR_SIMPLICITY_OVERWEIGHT:
             return SIMPLICITY_ERR_MSG(SIMPLICITY_ERR_OVERWEIGHT);
+        case SCRIPT_ERR_SIMPLICITY_NOT_YET_IMPLEMENTED:
+            return SIMPLICITY_ERR_MSG(SIMPLICITY_ERR_NOT_YET_IMPLEMENTED);
         case SCRIPT_ERR_UNKNOWN_ERROR:
         case SCRIPT_ERR_ERROR_COUNT:
             break;
