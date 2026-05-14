@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <cstdio>
+#include <compat/endian.h>
 #include <primitives/transaction.h>
 #include <script/interpreter.h>
 extern "C" {
