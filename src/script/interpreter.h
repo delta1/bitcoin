@@ -16,6 +16,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -171,7 +172,8 @@ struct SimplicityTransactionDeleter
 {
     void operator()(bitcoinTransaction* ptr) const;
 };
-using SimplicityTransactionUniquePtr = std::unique_ptr<bitcoinTransaction, SimplicityTransactionDeleter>;
+// shared_ptr so PrecomputedTransactionData remains copyable; bitcoinTransaction is immutable after creation.
+using SimplicityTransactionUniquePtr = std::shared_ptr<bitcoinTransaction>;
 
 struct PrecomputedTransactionData
 {
