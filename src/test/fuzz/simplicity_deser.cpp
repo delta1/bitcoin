@@ -28,7 +28,7 @@ extern "C" {
 }
 #include <test/fuzz/fuzz.h>
 
-#include <simplicity_deser_helper.h>
+#include "simplicity_deser_helper.h"
 
 static constexpr uint32_t DESER_MAX_PROG = 1u << 20; /* 1 MiB cap */
 

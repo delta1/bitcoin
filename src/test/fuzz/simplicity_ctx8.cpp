@@ -26,7 +26,7 @@
 
 #include <test/fuzz/fuzz.h>
 
-#include <simplicity_ctx8_helper.h>
+#include "simplicity_ctx8_helper.h"
 
 FUZZ_TARGET(simplicity_ctx8)
 {
