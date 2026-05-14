@@ -44,4 +44,4 @@ void simplicity_fuzz_core_jets(const uint8_t* src_data, size_t src_len);
 } /* extern "C" */
 #endif
 
-#endif /* BITCOIN_TEST_FUZZ_SIMPLICITY_JETS_HELPER_H */
+#endif // BITCOIN_TEST_FUZZ_SIMPLICITY_JETS_HELPER_H

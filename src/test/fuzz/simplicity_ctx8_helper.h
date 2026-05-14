@@ -27,4 +27,4 @@ void simplicity_fuzz_ctx8(const uint8_t* data, size_t len);
 }
 #endif
 
-#endif /* BITCOIN_TEST_FUZZ_SIMPLICITY_CTX8_HELPER_H */
+#endif // BITCOIN_TEST_FUZZ_SIMPLICITY_CTX8_HELPER_H

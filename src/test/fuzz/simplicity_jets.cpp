@@ -26,7 +26,7 @@ extern "C" {
 #include <test/fuzz/FuzzedDataProvider.h>
 #include <test/fuzz/fuzz.h>
 
-#include "simplicity_jets_helper.h"
+#include <simplicity_jets_helper.h>
 
 FUZZ_TARGET(simplicity_jets)
 {

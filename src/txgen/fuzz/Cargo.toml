@@ -13,16 +13,8 @@ libfuzzer-sys = "0.4"
 [dependencies.txgen]
 path = ".."
 
-[[bin]]
-name = "fuzz_target_1"
-path = "fuzz_targets/fuzz_target_1.rs"
-test = false
-doc = false
-bench = false
-
 [lib]
 name = "txgen"
 path = "../src/lib.rs"
 crate-type = ["cdylib"]#, "rlib"]
 panic = "abort"
-

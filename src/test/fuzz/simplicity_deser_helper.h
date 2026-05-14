@@ -37,4 +37,4 @@ void simplicity_deser_run(const uint8_t* prog, size_t prog_len,
 }
 #endif
 
-#endif /* BITCOIN_TEST_FUZZ_SIMPLICITY_DESER_HELPER_H */
+#endif // BITCOIN_TEST_FUZZ_SIMPLICITY_DESER_HELPER_H
