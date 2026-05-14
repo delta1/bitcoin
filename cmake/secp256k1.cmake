@@ -26,6 +26,10 @@ function(add_secp256k1 subdir)
     set(SECP256K1_BUILD_CTIME_TESTS ${BUILD_TESTS} CACHE BOOL "" FORCE)
   endif()
   set(SECP256K1_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  # ASAN exhausts the registers needed by secp256k1's x86_64 inline assembly.
+  if(SANITIZERS MATCHES "(^|,)address(,|$)")
+    set(SECP256K1_ASM "OFF" CACHE STRING "" FORCE)
+  endif()
   include(GetTargetInterface)
   # -fsanitize and related flags apply to both C++ and C,
   # so we can pass them down to libsecp256k1 as CFLAGS and LDFLAGS.
