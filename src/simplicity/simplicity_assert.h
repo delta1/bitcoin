@@ -31,7 +31,11 @@
 #endif
 
 #ifndef SIMPLICITY_UNREACHABLE
-#  define SIMPLICITY_UNREACHABLE assert(NULL == "SIMPLICITY_UNCREACHABLE was reached")
+#  ifdef _MSC_VER
+#    define SIMPLICITY_UNREACHABLE do { assert(NULL == "SIMPLICITY_UNREACHABLE was reached"); __assume(0); } while(0)
+#  else
+#    define SIMPLICITY_UNREACHABLE assert(NULL == "SIMPLICITY_UNCREACHABLE was reached")
+#  endif
 #endif
 
 #endif /* SIMPLICITY_SIMPLICITY_ASSERT_H */
