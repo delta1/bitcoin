@@ -1711,7 +1711,7 @@ void PrecomputedTransactionData::Init(const T& txTo, std::vector<CTxOut>&& spent
             simplicityRawInput[i].txo.value = m_spent_outputs[i].nValue;
             simplicityRawInput[i].txo.scriptPubKey.buf = m_spent_outputs[i].scriptPubKey.data();
             simplicityRawInput[i].txo.scriptPubKey.len = m_spent_outputs[i].scriptPubKey.size();
-            simplicityRawInput[i].annex = NULL;
+            simplicityRawInput[i].annex = nullptr;
             std::span<const valtype> stack{txTo.vin[i].scriptWitness.stack};
             if (stack.size() >= 2 && !stack.back().empty() && stack.back()[0] == ANNEX_TAG) {
                 simplicityRawAnnex[i].buf = stack.back().data()+1;
