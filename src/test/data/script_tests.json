@@ -2601,7 +2601,7 @@
     "0x51 0x20 #TAPROOTOUTPUT#",
     "P2SH,WITNESS,TAPROOT,DISCOURAGE_OP_CAT,DISCOURAGE_OP_SUCCESS",
     "DISCOURAGE_OP_CAT",
-    "TAPSCRIPT test of a invalid script (CAT called with empty stack) executed with DISCOURAGE_OP_CAT and DISCOURAGE_OP_SUCCESS flags enabled. This tests demonstrates that DISCOURAGE_OP_CAT will take priority over the OP_SUCCESS discourage flag and OP_CAT is never exectuted"
+    "TAPSCRIPT test of a invalid script (CAT called with empty stack) executed with DISCOURAGE_OP_CAT and DISCOURAGE_OP_SUCCESS flags enabled. This tests demonstrates that DISCOURAGE_OP_CAT will take priority over the OP_SUCCESS discourage flag and OP_CAT is never executed"
 ],
 [
     [
