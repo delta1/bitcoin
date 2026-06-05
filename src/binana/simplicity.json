@@ -2,6 +2,6 @@
     "binana": [2026, 4, 0],
     "deployment": "SIMPLICITY",
     "scriptverify": true,
-    "scriptverify_discourage": true,
+    "scriptverify_discourage": false,
     "opcodes": {}
 }
